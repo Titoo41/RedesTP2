@@ -1,0 +1,106 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #2c3e50; /* Fondo oscuro */
+  margin: 0;
+  padding: 0;
+  color: #ecf0f1; /* Texto claro */
+}
+
+h1 {
+  color: #ecf0f1; /* Texto claro */
+  text-align: center;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 20px auto;
+  background: #34495e; /* Fondo oscuro para el contenedor */
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Sombra más prominente */
+  border-radius: 8px;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  width: 100% !important;
+  max-width: 100%;
+  height: auto !important;
+  background: #ecf0f1; /* Fondo claro para el canvas */
+  border: 2px solid #bdc3c7; /* Borde gris claro */
+  border-radius: 8px;
+}
+
+.login-container {
+  width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  background: #34495e; /* Fondo oscuro para el contenedor de login */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Sombra más prominente */
+  border-radius: 8px;
+  color: #ecf0f1; /* Texto claro */
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input[type="text"],
+input[type="password"] {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #95a5a6; /* Borde gris */
+  border-radius: 4px;
+  background: #ecf0f1; /* Fondo claro */
+  color: #2c3e50; /* Texto oscuro */
+}
+
+button {
+  padding: 10px;
+  background: #e67e22; /* Naranja para el botón */
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #d35400; /* Naranja más oscuro al pasar el mouse */
+}
+
+/* Estilo adicional para darle aspecto de tablero industrial */
+.indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.indicator.on {
+  background-color: #2ecc71; /* Verde para indicador encendido */
+}
+
+.indicator.off {
+  background-color: #e74c3c; /* Rojo para indicador apagado */
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1abc9c; /* Verde para la barra de estado */
+  padding: 10px 20px;
+  color: #ecf0f1; /* Texto claro */
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.status-bar span {
+  font-weight: bold;
+}

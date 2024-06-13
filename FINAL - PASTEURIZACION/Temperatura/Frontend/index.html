@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temperature Chart</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Monitoreo de temperaturas de pasteurización</h1>
+    <div class="status-bar">
+      <div class="indicator on"></div>
+      <span>Proceso Activo</span>
+    </div>
+    <canvas id="temperatureChart"></canvas>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let temperatureChart = null;
+
+      const cleanKeys = (obj) => {
+        const newObj = {};
+        for (const key in obj) {
+          const cleanKey = key.trim();
+          newObj[cleanKey] = obj[key];
+        }
+        return newObj;
+      };
+
+      const fetchTemperatureData = async () => {
+        try {
+          console.log('Fetching temperature data...');
+          const token = localStorage.getItem('token');
+          if (!token) {
+            alert('No se encontró el token. Por favor, inicie sesión.');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const response = await fetch('http://localhost:3002/temperatura', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.status === 401) {
+            console.error('Unauthorized request. Token might be invalid.');
+            alert('No autorizado. Por favor, inicie sesión.');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          let data = await response.json();
+          console.log('Data received from server:', data);
+
+          // Limpiar las claves de los objetos en data
+          data = data.map(cleanKeys);
+
+          if (data.length > 0) {
+            const currentTime = new Date().getTime();
+            const twoMinutesAgo = currentTime - 2 * 60 * 1000;
+            console.log('Current time:', currentTime, 'Two minutes ago:', twoMinutesAgo);
+
+            const filteredData = data.filter(item => {
+              if (item['temperaturas_timestamp']) {
+                const timestamp = new Date(item['temperaturas_timestamp'].trim()).getTime();
+                console.log('Timestamp:', timestamp, 'Current time - 2 minutes:', twoMinutesAgo);
+                return timestamp >= twoMinutesAgo;
+              } else {
+                console.warn('Missing timestamp for item:', item);
+                return false;
+              }
+            });
+
+            const formattedData = filteredData.map(item => ({
+              x: new Date(item['temperaturas_timestamp'].trim()).getTime(),
+              y: parseFloat(item['temperaturas_valor'])
+            }));
+
+            updateChart(formattedData);
+          } else {
+            console.error('No se recibieron datos válidos del servidor');
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+
+      const updateChart = (formattedData) => {
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        if (temperatureChart) {
+          temperatureChart.data.datasets[0].data = formattedData;
+          temperatureChart.options.scales.x.min = new Date().getTime() - 2 * 60 * 1000;
+          temperatureChart.options.scales.x.max = new Date().getTime();
+          temperatureChart.update();
+        } else {
+          temperatureChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              datasets: [{
+                label: 'Temperatura a lo largo del tiempo',
+                data: formattedData,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2,
+                fill: true
+              }]
+            },
+            options: {
+              scales: {
+                x: {
+                  type: 'time',
+                  time: {
+                    unit: 'minute',
+                    displayFormats: {
+                      minute: 'h:mm a'
+                    }
+                  },
+                  title: {
+                    display: true,
+                    text: 'Tiempo'
+                  },
+                  min: new Date().getTime() - 2 * 60 * 1000,
+                  max: new Date().getTime()
+                },
+                y: {
+                  suggestedMin: 68,
+                  suggestedMax: 75,
+                  title: {
+                    display: true,
+                    text: 'Temperatura (°C)'
+                  }
+                }
+              },
+              plugins: {
+                annotation: {
+                  annotations: {
+                    line1: {
+                      type: 'line',
+                      yMin: 72,
+                      yMax: 72,
+                      borderColor: 'red',
+                      borderWidth: 2,
+                      label: {
+                        content: 'Temperatura óptima de salida',
+                        enabled: true,
+                        position: 'center'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      };
+
+      fetchTemperatureData();
+      setInterval(fetchTemperatureData, 6000);
+    });
+  </script>
+</body>
+</html>
